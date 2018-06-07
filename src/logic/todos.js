@@ -1,34 +1,51 @@
-export const ADD_ITEM = 'qgo/assessment/ADD_ITEM';
+import { createAction, handleActions } from 'redux-actions';
 
-export const addItem = (content) => {
-  return { type: ADD_ITEM, content };
-};
+export const addItem = createAction('qgo/assessment/ADD_ITEM');
+export const deleteItem = createAction('qgo/assessment/DELETE_ITEM');
+export const setItemComplete = createAction('qgo/assessment/SET_ITEM_COMPLETE');
 
 export const initialState = {
   items: [
-    { id: 1, content: 'Call mum' },
-    { id: 2, content: 'Buy cat food' },
-    { id: 3, content: 'Water the plants' },
+    { id: 1, content: 'Call mum', complete: false },
+    { id: 2, content: 'Buy cat food', complete: false },
+    { id: 3, content: 'Water the plants', complete: false },
   ],
 };
 
-const reducer = (state = initialState, action) => {
-  switch (action.type) {
-    case ADD_ITEM:
+const reducer = handleActions(
+  {
+    [addItem](state, { payload }) {
       const nextId =
         state.items.reduce((id, item) => Math.max(item.id, id), 0) + 1;
       const newItem = {
         id: nextId,
-        content: action.content,
+        content: payload,
       };
 
       return {
         ...state,
         items: [...state.items, newItem],
       };
-    default:
-      return state;
-  }
-};
+    },
+    [deleteItem](state, { payload: id }) {
+      return {
+        ...state,
+        items: state.items.filter((i) => i.id !== id),
+      };
+    },
+    [setItemComplete](state, { payload }) {
+      return {
+        ...state,
+        items: state.items.map((i) => {
+          if (i.id === payload.id) {
+            return { ...i, complete: payload.complete };
+          }
+          return i;
+        }),
+      };
+    },
+  },
+  initialState,
+);
 
 export default reducer;
